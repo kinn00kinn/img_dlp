@@ -3,6 +3,8 @@ import os
 import shutil
 from urllib.parse import urlparse, parse_qs
 import sys
+import uuid
+import re
 
 # need to install
 import requests # pip install requests
@@ -10,24 +12,35 @@ from bs4 import BeautifulSoup # pip install beautifulsoup4
 import img2pdf # pip3 install img2pdf
 from PIL import Image # img2pdfと一緒にインストールされたPillowを使います
 
+
 def url_to_pagename(url):
     result = urlparse(url)
     result = str(result.path)
     result = result.replace(".", "_").replace("/","XX")
     return result
 
+def is_ok_url(url):
+    pattern = "https?://[\w/:%#\$&\?\(\)~\.=\+\-]+"
+
+    if re.match(pattern, url):
+        return True
+    else:  
+        return False
+
 
 
 def download_img(page_url):
-    img_dir = "img/"
-
+    img_dir = str(uuid.uuid4())+"img/"
     if os.path.isdir(img_dir):
+        os.chmod(img_dir,0o777)
         shutil.rmtree(img_dir)
     os.mkdir(img_dir)
+    os.chmod(img_dir,0o777)
 
-    # agent偽装
-    user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'
-    header = {'User-Agent': user_agent}
+    # agent偽装    
+    header = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
+    }
 
     # get
     r = requests.get(page_url,headers=header)
@@ -37,12 +50,11 @@ def download_img(page_url):
     img_tags = soup.find_all("img")
     img_urls = []
     for img_tag in img_tags:
-        # if not ("_thumb.jpg" in img_tag.get("src")):
-            # continue
         url = img_tag.get("src")
-        if (url != None):
+        # print(url)
+        if (url != None) and (is_ok_url(url)): # is_ok_url(url)
             img_urls.append(url)
-            # print(url)
+            print(url)
 
     # print(img_urls)
 
@@ -54,24 +66,21 @@ def download_img(page_url):
                 f.write(p.content)
     
     # to pdf
-    pdf_FileName = url_to_pagename(page_url)+".pdf" # 出力するPDFの名前
-    png_Folder = "img\\" # 画像フォルダ
+    # pdf_FileName = url_to_pagename(page_url)+".pdf" # 出力するPDFの名前
+    pdf_FileName = str(uuid.uuid4())+".pdf" # 出力するPDFの名前
+    print(pdf_FileName)
     extension  = ".png" # 拡張子がPNGのものを対象
     
     ext  = ".png"
 
     with open(pdf_FileName,"wb") as f:
         # 画像フォルダの中にあるPNGファイルを取得し配列に追加、バイナリ形式でファイルに書き込む
-        f.write(img2pdf.convert([Image.open(png_Folder+j).filename for j in os.listdir(png_Folder)if j.endswith(extension)]))
+        f.write(img2pdf.convert([Image.open(img_dir+j).filename for j in os.listdir(img_dir)if j.endswith(extension)]))
     
-    print("successfully downloaded!!")
+    # print("successfully downloaded!!")
     # imgフォルダ削除
+    os.chmod(img_dir,0o777)
     shutil.rmtree(img_dir)
 
 
-if __name__ == "__main__":
-    argc = sys.argv
-    if(len(argc) != 2):
-        print("Usage: python download.py [url]")
-        sys.exit(1)
-    download_img(argc[1])
+
