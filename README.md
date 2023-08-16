@@ -10,7 +10,7 @@
 img_dlp is a script to collect images from the website and merge them into pdf.
 Note: This script isn't optimized for every website,  so some additional trash images may be included with pdf. 
 # Licence
-It follows MIT Licence. Please refer [Here](Licence) 
+It follows MIT Licence. Please refer [Here](LICENCE) 
 
 # Requestment
 This script use Python and some Python modules.
