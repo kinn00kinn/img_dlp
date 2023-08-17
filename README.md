@@ -2,9 +2,6 @@
 <p align="center"><a target="_blank" rel="noopener noreferrer"><img width="300" height="100" src="https://img.shields.io/badge/-img--dlp-black?logo=python" alt="img_dlp_logo"></a></p>
 
 
-[![Supported Versions](https://img.shields.io/pypi/pyversions/requests.svg)](https://pypi.org/project/requests)
-
-
 # About img_dlp
 img_dlp is a script to collect images from the website and merge them into pdf.
 Note: This script isn't optimized for every website,  so some additional trash images may be included with pdf. 
